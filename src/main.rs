@@ -4,6 +4,7 @@ use sdl2::rect::{Point, Rect};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
+use rand::{Rand, Rng};
 
 #[derive(Clone)]
 struct Vehicle {
@@ -24,6 +25,17 @@ enum Turning {
     Right,
     Straight
 }
+
+impl Rand for Turning {
+    fn rand<R: Rng>(rng: &mut R) -> Self {
+        match rng.gen_range(0, 3) {
+            0 => Turning::Left,
+            1 => Turning::Right,
+            _ => Turning::Straight,
+        }
+    }
+}
+
 impl Vehicle {
     fn new(position:(i32, i32), turn:Turning, direction:Direction) ->Self {
         Vehicle { position: position, turn:turn, direction:direction }
@@ -106,20 +118,23 @@ pub fn main() {
     canvas.clear();
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let from_north = (width as i32/2 - 20, 0);
-    let from_east = (width as i32 -20, height as i32/2-20);
-    let from_west = (0, height as i32/2);
-    let from_south = (width as i32/2, height as i32 - 20);
-    let mut vehicle = Vehicle::new(from_south, Turning::Right, Direction::North);
-    let mut vehicle2 = Vehicle::new(from_south, Turning::Right, Direction::North);
-    let mut vehicle3 = Vehicle::new(from_south, Turning::Right, Direction::North);
-    let mut vehicle4 = Vehicle::new(from_south, Turning::Right, Direction::North);
-    let mut traffic = Traffic::new();
-    traffic.add_vehicle(vehicle);
-    traffic.add_vehicle(vehicle2);
-    traffic.add_vehicle(vehicle3);
-    traffic.add_vehicle(vehicle4);
+    let from_north = (width as i32/2 - 20, -20);
+    let from_east = (width as i32 , height as i32/2-20);
+    let from_west = (-20, height as i32/2);
+    let from_south = (width as i32/2, height as i32 );
+    // let mut vehicle = Vehicle::new(from_south, Turning::Right, Direction::North);
+    // let mut vehicle2 = Vehicle::new(from_south, Turning::Right, Direction::North);
+    // let mut vehicle3 = Vehicle::new(from_south, Turning::Right, Direction::North);
+    // let mut vehicle4 = Vehicle::new(from_south, Turning::Right, Direction::North);
+    // let mut vehicle3 = Vehicle::new(from_south, Turning::Right, Direction::North);
+    // let mut vehicle4 = Vehicle::new(from_south, Turning::Right, Direction::North);
+    let mut traffic = Traffic::new();   
+    // traffic.add_vehicle(vehicle);
+    // traffic.add_vehicle(vehicle2);
+    // traffic.add_vehicle(vehicle3);
+    // traffic.add_vehicle(vehicle4);
     // let mut i = 0;
+    let mut rng = rand::thread_rng();
     'running: loop {
         // i = (i + 1) % 255;
         // canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
@@ -130,6 +145,10 @@ pub fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running
                 },
+                Event::KeyDown{keycode:Some(Keycode::Down), ..} => {
+                    let vehicle = Vehicle::new(from_south, rng.gen(), Direction::North);
+                    traffic.add_vehicle(vehicle);
+                }
                 _ => {}
             }
         }
