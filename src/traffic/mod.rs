@@ -45,7 +45,8 @@ pub enum Light {
 
 pub struct Traffic {
     pub vehicles: Vec<Vec<Vehicle>>,
-    pub lights: Vec<Light>,
+    pub lights: Vec<(Light, i32)>,
+    pub intersection: Vec<Vehicle>
     
     // canvas
 }
@@ -84,12 +85,49 @@ fn is_safe_distance(curr:&Vehicle, previous:&Vehicle) ->bool {
 }
 
 
+fn in_intersection(vehicle:&Vehicle, canvas : &WindowCanvas) -> bool {
+    let (w, h) = canvas.output_size().unwrap();
+    match vehicle.direction {
+        Direction::North => {
+            if vehicle.position.1 < h as i32 / 2 + 20 {
+                true
+            } else {
+                false
+            }
+        },
+        Direction::South => {
+            if vehicle.position.1 > h as i32 / 2 - 40 {
+                true
+            } else {
+                false
+            } 
+        },
+        Direction::West => {
+            if vehicle.position.0 < w as i32 / 2 + 20 {
+                true
+            } else {
+                false
+            } 
+        },
+        Direction::East => {
+            if vehicle.position.0 > w as i32 / 2 - 40 {
+                true
+            } else {
+                false
+            } 
+        }
+    }
+}
+
 impl Traffic {
     pub fn new() -> Self{
-        Traffic{vehicles: vec![vec![];4], lights:vec![Light::Red;4]}
+        Traffic{vehicles: vec![vec![];4], lights:vec![(Light::Green,30),(Light::Red,0), (Light::Green, 30), (Light::Red,0)], intersection:vec![]}
     }
     
     pub fn update_vehicles(&mut self, canvas: &mut WindowCanvas){
+        for vehicle in &mut self.intersection {
+            update_vehicle(canvas, vehicle, 10);
+        }
         for route in &mut self.vehicles {
             for ix in 0..route.len(){
                 if stop_vehicle(&self.lights,canvas,&route[ix]) {
@@ -104,7 +142,11 @@ impl Traffic {
                     update_vehicle(canvas, &mut route[ix], 10);
                 }
             }
+            if route.len() > 0 && in_intersection(&route[0], &canvas) {
+                self.intersection.push(route.remove(0));
+            } 
         }
+       
     }
    
     pub fn add_vehicle(&mut self, vehicle: Vehicle){
@@ -123,28 +165,48 @@ impl Traffic {
             },
         }
     }
+    pub fn traffic_light_system(& mut self){
+        for light in &mut self.lights{
+            match light.0 {
+                Light::Red => {
+                    light.1 += 1;
+                    if light.1 == 30 {
+                        light.0 = Light::Green;
+                    }
+                },
+                Light::Green => {
+                    light.1 -=1;
+                    if light.1 == 0 {
+                        light.0 = Light::Red;
+                    }
+                }
+            }
+        }
+
+    }
+    
     pub fn update_ligths(&mut self, canvas: &mut WindowCanvas){
         let (w, h) = canvas.output_size().unwrap();
         //north - south lights
-        let north_light = Rect::new(w as i32/2-40, h as i32/2-40, 20,20);
-        draw_lights(canvas, north_light, self.lights[0]);
-        let south_light = Rect::new(w as i32/2+20, h as i32/2+20,20,20);
-        draw_lights(canvas, south_light, self.lights[1]);
+        let south_light = Rect::new(w as i32/2-40, h as i32/2-40, 20,20);
+        draw_lights(canvas, south_light, self.lights[1].0);
+        let north_light = Rect::new(w as i32/2+20, h as i32/2+20,20,20);
+        draw_lights(canvas, north_light, self.lights[0].0);
         //west - east lights
         let west_light = Rect::new(w as i32/2+20, h as i32/2-40, 20,20);
-        draw_lights(canvas, west_light, self.lights[0]);    
+        draw_lights(canvas, west_light, self.lights[2].0);    
         let east_light = Rect::new(w as i32/2-40, h as i32/2+20,20,20);
-        draw_lights(canvas, east_light, self.lights[1]);
+        draw_lights(canvas, east_light, self.lights[3].0);
 
     }
 
 }
 
-fn stop_vehicle(lights:&Vec<Light>,canvas:&WindowCanvas, vehicle:&Vehicle)-> bool{
+fn stop_vehicle(lights:&Vec<(Light,i32)>,canvas:&WindowCanvas, vehicle:&Vehicle)-> bool{
     let (w, h) = canvas.output_size().unwrap();
     match vehicle.direction {
         Direction::North => {
-            match lights[0] {
+            match lights[0].0 {
                 Light::Green =>{
                     return false
                 },
@@ -158,7 +220,7 @@ fn stop_vehicle(lights:&Vec<Light>,canvas:&WindowCanvas, vehicle:&Vehicle)-> boo
             }
         },
         Direction::South => {
-            match lights[1] {
+            match lights[1].0 {
                 Light::Green =>{
                     return false
                 },
@@ -172,7 +234,7 @@ fn stop_vehicle(lights:&Vec<Light>,canvas:&WindowCanvas, vehicle:&Vehicle)-> boo
             }
         },
         Direction::West => {
-            match lights[2] {
+            match lights[2].0 {
                 Light::Green =>{
                     return false
                 },
@@ -186,7 +248,7 @@ fn stop_vehicle(lights:&Vec<Light>,canvas:&WindowCanvas, vehicle:&Vehicle)-> boo
             }
         },
         Direction::East => {
-            match lights[3] {
+            match lights[3].0 {
                 Light::Green =>{
                     return false
                 },
@@ -199,10 +261,6 @@ fn stop_vehicle(lights:&Vec<Light>,canvas:&WindowCanvas, vehicle:&Vehicle)-> boo
                 }
             }
         },
-
-
-
-        _ => false,
     }
 }
 

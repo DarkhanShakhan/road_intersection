@@ -60,6 +60,7 @@ pub fn main() {
         canvas.set_draw_color(Color::GREY);
         canvas.clear();
         update_layout(&mut canvas);
+        traffic.traffic_light_system();
         traffic.update_ligths(&mut canvas);
         traffic.update_vehicles(&mut canvas);
         canvas.present();
