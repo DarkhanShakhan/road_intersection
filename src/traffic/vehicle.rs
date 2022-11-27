@@ -200,3 +200,37 @@ pub fn in_intersection(vehicle:&Vehicle, canvas : &WindowCanvas) -> bool {
         }
     }
 }
+
+pub fn passed_intersection(vehicle:&Vehicle, canvas: &WindowCanvas) -> bool {
+    let (w, h) = canvas.output_size().unwrap();
+    match vehicle.direction {
+        Direction::North => {
+            if vehicle.position.1 <= h as i32 / 2 - 40 {
+                true
+            } else {
+                false
+            }
+        },
+        Direction::South => {
+            if vehicle.position.1 >= h as i32 / 2 + 20 {
+                true
+            } else {
+                false
+            } 
+        },
+        Direction::West => {
+            if vehicle.position.0 <= w as i32 / 2 - 40 {
+                true
+            } else {
+                false
+            } 
+        },
+        Direction::East => {
+            if vehicle.position.0 >= w as i32 / 2 + 20 {
+                true
+            } else {
+                false
+            } 
+        }
+    }
+}
