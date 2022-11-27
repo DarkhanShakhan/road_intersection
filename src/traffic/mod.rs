@@ -19,7 +19,6 @@ pub enum Light {
     Green
 }
 
-
 impl Traffic {
     pub fn new() -> Self{
         Traffic{vehicles: vec![vec![];4], lights:vec![(Light::Green,16),(Light::Red,16), (Light::Red, 0), (Light::Red,32)], intersection:vec![], passed:vec![]}
@@ -84,19 +83,22 @@ impl Traffic {
         }
     }
     pub fn traffic_light_system(& mut self){
-        for light in &mut self.lights{
-            match light.0 {
+
+        for ix in 0..4 {
+            match self.lights[ix].0 {
                 Light::Red => {
-                    light.1 += 1;
-                    if light.1 == 48 {
-                        light.0 = Light::Green;
-                        light.1 = 16;
+                    self.lights[ix].1 += 1;
+                    if self.lights[ix].1 == 48 {
+                        self.lights[ix].0 = Light::Green;
+                        self.lights[ix].1 = 16;
                     }
                 },
                 Light::Green => {
-                    light.1 -=1;
-                    if light.1 == 0 {
-                        light.0 = Light::Red;
+                    self.lights[ix].1 -=1;
+                    if self.lights[ix].1 == 0 {
+                            self.lights[ix].0 = Light::Red;
+                    } else if self.lights[ix].1 == 1 && self.is_busier(ix){
+                        self.update_light_counter();
                     }
                 }
             }
@@ -104,6 +106,25 @@ impl Traffic {
 
     }
     
+    fn update_light_counter(&mut self) {
+        for light in &mut self.lights{
+            match light.0 {
+                Light::Red => light.1 -= 16,
+                Light::Green => light.1 += 16
+            }
+        }
+    }
+    fn is_busier(&mut self, ix:usize) ->bool {
+        let total = self.vehicles[ix].len();
+        for i in 0..4 {
+            if i != ix {
+                if total < self.vehicles[i].len() {
+                    return false
+                }
+            }
+        }
+        true
+    }
     pub fn update_ligths(&mut self, canvas: &mut WindowCanvas){
         let (w, h) = canvas.output_size().unwrap();
         //north - south lights
