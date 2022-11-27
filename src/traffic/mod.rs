@@ -280,6 +280,11 @@ fn draw_lights(canvas: &mut WindowCanvas,rect:Rect, light:Light){
 fn update_vehicle(canvas: &mut WindowCanvas,vehicle: &mut Vehicle, speed:i32){
     let rect = Rect::new(vehicle.position.0, vehicle.position.1, 20,20);
     let (width,height) = canvas.output_size().unwrap();
+    match vehicle.turn {
+        Turning::Left => canvas.set_draw_color(Color::CYAN),
+        Turning::Right => canvas.set_draw_color(Color::BLUE),
+        Turning::Straight => canvas.set_draw_color(Color::YELLOW)
+    }
     canvas.set_draw_color(Color::CYAN);
     canvas.fill_rect(rect).unwrap();
     // canvas.present();
