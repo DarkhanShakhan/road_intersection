@@ -45,6 +45,18 @@ pub enum Direction {
     East
 }
 
+impl Rand for Direction {
+    fn rand<R: Rng>(rng: &mut R) -> Self {
+        match rng.gen_range(0, 5) {
+            0 => Direction::North,
+            1 => Direction::South,
+            2 => Direction::West,
+            _ => Direction::East
+        }
+    }
+}
+
+
 pub fn is_safe_distance(curr:&Vehicle, previous:&Vehicle) ->bool {
     match curr.direction {
         Direction::North => {
@@ -233,4 +245,9 @@ pub fn passed_intersection(vehicle:&Vehicle, canvas: &WindowCanvas) -> bool {
             } 
         }
     }
+}
+
+pub fn passed_scope(vehicle:&Vehicle, canvas: &WindowCanvas) -> bool{
+    let (w, h) = canvas.output_size().unwrap();
+    vehicle.position.0 <= -20 || vehicle.position.0 >= w  as i32|| vehicle.position.1 <= -20 || vehicle.position.1 >= h as i32
 }

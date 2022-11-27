@@ -22,22 +22,29 @@ pub enum Light {
 
 impl Traffic {
     pub fn new() -> Self{
-        Traffic{vehicles: vec![vec![];4], lights:vec![(Light::Green,16),(Light::Red,0), (Light::Red, 24), (Light::Red,48)], intersection:vec![], passed:vec![]}
+        Traffic{vehicles: vec![vec![];4], lights:vec![(Light::Green,16),(Light::Red,16), (Light::Red, 0), (Light::Red,32)], intersection:vec![], passed:vec![]}
     }
     
     pub fn update_vehicles(&mut self, canvas: &mut WindowCanvas){
-        for vehicle in &mut self.passed {
-            update_vehicle(canvas, vehicle, 10);
-        }
         let mut to_release = vec![];
-        for ix in 0..self.intersection.len(){
-            update_vehicle(canvas, &mut self.intersection[ix], 10);
-            if passed_intersection(&self.intersection[ix], canvas) {
+        for ix in 0..self.passed.len(){
+            update_vehicle(canvas, &mut self.passed[ix], 10);
+            if passed_scope(&self.passed[ix], canvas) {
                 to_release.push(ix);
             }
         }
         for ix in (0..to_release.len()).rev() {
-            self.passed.push(self.intersection.remove(to_release[ix]));
+            self.passed.remove(to_release[ix]);
+        }
+        let mut to_passed = vec![];
+        for ix in 0..self.intersection.len(){
+            update_vehicle(canvas, &mut self.intersection[ix], 10);
+            if passed_intersection(&self.intersection[ix], canvas) {
+                to_passed.push(ix);
+            }
+        }
+        for ix in (0..to_passed.len()).rev() {
+            self.passed.push(self.intersection.remove(to_passed[ix]));
         }
         for route in &mut self.vehicles {
             for ix in 0..route.len(){
@@ -81,7 +88,7 @@ impl Traffic {
             match light.0 {
                 Light::Red => {
                     light.1 += 1;
-                    if light.1 == 64 {
+                    if light.1 == 48 {
                         light.0 = Light::Green;
                         light.1 = 16;
                     }

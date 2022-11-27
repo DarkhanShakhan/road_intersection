@@ -54,6 +54,18 @@ pub fn main() {
                     let vehicle = Vehicle::new(from_east, rng.gen(), Direction::West);
                     traffic.add_vehicle(vehicle);
                 }
+                Event::KeyDown{keycode:Some(Keycode::R), ..} => {
+                    let direction:Direction = rng.gen();
+                    let position : (i32, i32);
+                    match direction {
+                        Direction::North => position = from_south,
+                        Direction::South => position =from_north,
+                        Direction::East => position = from_west,
+                        Direction::West => position = from_east
+                    }
+                    let vehicle = Vehicle::new(position, rng.gen(), direction);
+                    traffic.add_vehicle(vehicle);
+                }
                 _ => {}
             }
         }
@@ -64,7 +76,7 @@ pub fn main() {
         traffic.update_ligths(&mut canvas);
         traffic.update_vehicles(&mut canvas);
         canvas.present();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 ));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32/60 ));
     }
 }
 
