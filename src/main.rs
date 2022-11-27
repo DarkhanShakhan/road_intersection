@@ -63,7 +63,27 @@ fn is_safe_distance(curr:&Vehicle, previous:&Vehicle) ->bool {
                 false
             }
         }
-        _ => true
+        Direction::South => {
+            if previous.position.1 - (curr.position.1 + 30) > 10 || curr.position.0 != previous.position.0{
+                true
+            } else {
+                false
+            }
+        }
+        Direction::West => {
+            if curr.position.0 - (previous.position.0 + 30) > 10 || curr.position.1 != previous.position.1{
+                true
+            } else {
+                false
+            }
+        }
+        Direction::East => {
+            if previous.position.0  - (curr.position.0+30) > 10 || curr.position.1 != previous.position.1{
+                true
+            } else {
+                false
+            }
+        }
     }
 }
 
@@ -95,7 +115,15 @@ impl Traffic {
             Direction::North => {
                 self.vehicles[0].push(vehicle);
             },
-            _ => ()
+            Direction::South => {
+                self.vehicles[1].push(vehicle);
+            },
+            Direction::West => {
+                self.vehicles[2].push(vehicle);
+            },
+            Direction::East => {
+                self.vehicles[3].push(vehicle);
+            },
         }
     }
 
@@ -147,6 +175,18 @@ pub fn main() {
                 },
                 Event::KeyDown{keycode:Some(Keycode::Down), ..} => {
                     let vehicle = Vehicle::new(from_south, rng.gen(), Direction::North);
+                    traffic.add_vehicle(vehicle);
+                }
+                Event::KeyDown{keycode:Some(Keycode::Up), ..} => {
+                    let vehicle = Vehicle::new(from_north, rng.gen(), Direction::South);
+                    traffic.add_vehicle(vehicle);
+                }
+                Event::KeyDown{keycode:Some(Keycode::Left), ..} => {
+                    let vehicle = Vehicle::new(from_west, rng.gen(), Direction::East);  
+                    traffic.add_vehicle(vehicle);
+                }
+                Event::KeyDown{keycode:Some(Keycode::Right), ..} => {
+                    let vehicle = Vehicle::new(from_east, rng.gen(), Direction::West);
                     traffic.add_vehicle(vehicle);
                 }
                 _ => {}
